@@ -9,13 +9,13 @@ You will need Python 2.7.14 Installed
 
 ## Download the source code
 
-<code>git clone https://github.com/abhishek-12355/ud036_StarterCode.git</code>
-or simply click Download Zip under Clone or Download Menu at https://github.com/abhishek-12355/ud036_StarterCode/ 
+<code>git clone https://github.com/abhishek-12355/fd-catalog.git</code>
+or simply click Download Zip under Clone or Download Menu at https://github.com/abhishek-12355/fd-catalog 
 
 ## Instructions
+From within the fd-catalog directory, run
+1. `python database_setup.py` to create database. Note that this script populates some sample data. 
+2. `python application` to run the application. This application is bound to 0.0.0.0:5000.
+3. Access the application via browsing to `<localhost|ip>:5000` 
 
-1. Open your python shell
-2. Change directory to the source folder
-3. Run entertainment_center.py file
-<code>python entertainment_center.py</code>
-4. Enjoy!
+
