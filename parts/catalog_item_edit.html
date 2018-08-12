@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<section>
+    <div class="row row-padding">
+        <label for="title">Title</label>
+    </div>
+    <div class="row">
+        <input type="text" id="title" disabled name="title" value="{{item.name}}">
+    </div>
+    <div class="row row-padding">
+        <label for="description">Description</label>
+    </div>
+    <div class="row">
+        <input type="text" id="description" name="description" value="{{item.description}}">
+    </div>
+    <div class="row row-padding">
+        <label for="category">Category</label>
+    </div>
+    <div class="row">
+        <select name="category" id="category">
+            {% for category in categories %}
+            <option {% if item.category== category.name %} selected {% endif %}>{{category.name}}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="row row-padding">
+        <button type="submit" onclick="editItem()">Edite Item</button>
+        <button type="button" onclick="cancelDelete()">Cancel</button>
+        <div id="result"></div>
+    </div>
+</section>
+<script>
+
+    function cancelDelete() {
+        window.history.back();
+    }
+
+    function editItem() {
+        $.ajax({
+            type: 'POST',
+            url: '/api/catalog/edit',
+            processData: false,
+            data: JSON.stringify({
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                category: document.getElementById('category').value,
+            }),
+            contentType: 'application/json',
+            success: function (result) {
+                // Handle or verify the server response if necessary.
+                if (result) {
+                    $('#result').html('Edit Successful!</br>' + result + '</br>Redirecting...')
+                    setTimeout(function () {
+                        window.location.href = "/catalog/{{item.category}}/{{item.name}}";
+                    }, 1000);
+
+                } else {
+                    $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+                }
+            },
+            error: function (response) {
+                console.error(response);
+                $('#result').html('Failed to make a server-side call. Check your configuration and console.');
+            }
+
+        });
+    }
+</script>
+{% endblock %}

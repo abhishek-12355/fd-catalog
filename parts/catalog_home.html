@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+{% block body %}
+<div class="categories">
+    <section>
+        <h1>Categories</h1>
+        <ul>
+            {% for category in categories %}
+            <li><a href="/catalog/{{category.name}}/Items">{{category.name}}</a></li>
+            {% endfor %}
+        </ul>
+    </section>
+</div><div class="items">
+    <section>
+        {% if session['username'] %}
+        <a href="/catalog/add">Add Item</a>
+        {% endif %}
+        <h1>{{category}}</h1>
+        <ul>
+            {% if category == 'Latest Items' %}
+            {% for item in items %}
+            <li><a href="/catalog/{{item.category}}/{{item.name}}">{{item.name}}({{item.category}})</a></li>
+            {% endfor %}
+            {% else %}
+            {% for item in items %}
+            <li><a href="/catalog/{{item.category}}/{{item.name}}">{{item.name}}</a></li>
+            {% endfor %}
+            {% endif %}
+        </ul>
+    </section>
+</div>
+{% endblock %}
