@@ -1,12 +1,11 @@
 {% extends "layout.html" %}
 {% block body %}
-
 <section>
     <div class="row row-padding">
-        <label for="title">Title</label>
+        <label for="name">Name</label>
     </div>
     <div class="row">
-        <input type="text" id="title" disabled name="title" value="{{item.name}}">
+        <input type="text" id="name" disabled name="name" value="{{item.item_name}}">
     </div>
     <div class="row row-padding">
         <label for="description">Description</label>
@@ -14,7 +13,7 @@
     <div class="row">
         <input type="text" id="description" name="description" value="{{item.description}}">
     </div>
-    <div class="row row-padding">
+   <!-- <div class="row row-padding">
         <label for="category">Category</label>
     </div>
     <div class="row">
@@ -23,7 +22,7 @@
             <option {% if item.category== category.name %} selected {% endif %}>{{category.name}}</option>
             {% endfor %}
         </select>
-    </div>
+    </div>-->
     <div class="row row-padding">
         <button type="submit" onclick="editItem()">Edite Item</button>
         <button type="button" onclick="cancelDelete()">Cancel</button>
@@ -37,22 +36,32 @@
     }
 
     function editItem() {
+        let name = document.getElementById("name").value;
+        let description = document.getElementById("description").value;
+
+        if (!name || !description) {
+            alert("Item name and description are mandatory");
+            return;
+        }
+
+        let data = {
+            category: "{{category}}",
+            name: name,
+            description: description
+        };
+
         $.ajax({
             type: 'POST',
-            url: '/api/catalog/edit',
+            url: '/api/catalog/edit/{{item.category}}',
             processData: false,
-            data: JSON.stringify({
-                title: document.getElementById('title').value,
-                description: document.getElementById('description').value,
-                category: document.getElementById('category').value,
-            }),
+            data: JSON.stringify(data),
             contentType: 'application/json',
             success: function (result) {
                 // Handle or verify the server response if necessary.
                 if (result) {
                     $('#result').html('Edit Successful!</br>' + result + '</br>Redirecting...')
                     setTimeout(function () {
-                        window.location.href = "/catalog/{{item.category}}/{{item.name}}";
+                        window.location.href = "/catalog/{{item.category}}/{{item.item_name}}";
                     }, 1000);
 
                 } else {

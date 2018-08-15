@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from database_setup import Base, CategoriesTable, CategoryItemsTable
+
+from database_setup import Base, CategoriesTable, CategoryItemsTable, UserTable
 
 engine = create_engine('sqlite:///catalog.db')
 Base.metadata.bind = engine
@@ -51,42 +52,58 @@ def execute_delete(clazz):
             session.close()
 
 
+def validate_category_user(category, **kwargs):
+    return execute_query(CategoriesTable, category_name=category, **kwargs)\
+               .count() != 0
+
+
 def get_all_categories():
     return execute_query(CategoriesTable)
 
 
 def get_category_items(category):
-    return execute_query(CategoryItemsTable,
-                         category=category)
+    return execute_query(CategoryItemsTable, category=category)
 
 
 def get_all_category_items():
     return execute_query(CategoryItemsTable)
 
 
-def get_category_item(category, item_name):
-    return execute_query_single(CategoryItemsTable,
-                                category=category,
-                                name=item_name)
+def update_user(user_id):
+    if execute_query(UserTable, user_id=user_id).count() == 0:
+        execute_insert(UserTable(user_id=user_id))
+
+    return user_id
 
 
-def add_item(name, description, category):
-    execute_insert(CategoryItemsTable(category=category,
-                                      name=name,
+def create_category(category, user_id):
+    if execute_query(UserTable, user_id=user_id).count() == 0:
+        raise Exception("Unauthorized")
+
+    execute_insert(CategoriesTable(category_name=category, user_id=user_id))
+
+
+def create_item(category, name, description):
+    execute_insert(CategoryItemsTable(category=category, item_name=name,
                                       description=description))
 
 
-def update_item(name, description, category):
+def get_category_item(category, item_name):
+    return execute_query_single(CategoryItemsTable, category=category,
+                                item_name=item_name)
+
+
+def delete_item(category, item):
     item = execute_query_single(CategoryItemsTable,
-                                name=name,
+                                item_name=item,
+                                category=category)
+    execute_delete(item)
+
+
+def update_item(category, item, description):
+    item = execute_query_single(CategoryItemsTable,
+                                item_name=item,
                                 category=category)
     item.description = description
     item.category = category
     execute_insert(item)
-
-
-def delete_item(name, category):
-    item = execute_query_single(CategoryItemsTable,
-                                name=name,
-                                category=category)
-    execute_delete(item)

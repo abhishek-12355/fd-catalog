@@ -1,0 +1,44 @@
+{% extends "layout.html" %}
+{% block body %}
+<section>
+    <h1>{{item.item_name}}</h1>
+    <p>
+        Description: {{item.description}}
+    </p>
+    {% if session['authorized'] %}
+    <a href="/catalog/edit/{{item.category}}/{{item.item_name}}">Edit</a>
+    <button onclick="deleteItem()">Delete</button>
+    {% endif %}
+</section>
+
+<script>
+    function deleteItem() {
+
+        let c = window.confirm("Delete {{item.item_name}}");
+
+        if (!c) {
+            return;
+        }
+
+        $.ajax({
+            type: 'DELETE',
+            url: '/api/catalog/delete/{{item.category}}/{{item.item_name}}',
+            processData: false,
+            data: JSON.stringify(""),
+            contentType: 'application/json',
+            success: function (result) {
+                // Handle or verify the server response if necessary.
+                if (result) {
+                    setTimeout(function () {
+                        window.location.href = "{{url_for('category_list_view', category=item.category)}}";
+                    }, 1000);
+                } else {
+                    console.error('Failed to make a server-side call. Check your configuration and console.');
+                }
+            }
+
+        });
+    }
+</script>
+
+{% endblock %}

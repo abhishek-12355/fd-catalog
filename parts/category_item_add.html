@@ -1,0 +1,67 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<section>
+    <div class="row row-padding">
+        <label for="name">Name</label>
+    </div>
+    <div class="row">
+        <input type="text" id="name" name="name">
+    </div>
+    <!--<div class="row row-padding">
+        <label for="category">Category</label>
+    </div>
+    <div class="row">
+        <select name="category" id="category">
+            {% for category in categories %}
+            <option>{{category.name}}</option>
+            {% endfor %}
+        </select>
+    </div>-->
+    <div class="row row-padding">
+        <label for="description">Description</label>
+    </div>
+    <div class="row">
+        <textarea id="description" name="description" cols="40"></textarea>
+    </div>
+    <div class="row row-padding">
+        <button type="submit" onclick="addItem()">Submit</button>
+        <button type="button" onclick="history.back()">Cancel</button>
+    </div>
+</section>
+<script>
+    function addItem() {
+        let name = document.getElementById("name").value;
+        let description = document.getElementById("description").value;
+
+        if (!name || !description) {
+            alert("Item name and description are mandatory");
+            return;
+        }
+
+        let data = {
+            category: "{{category}}",
+            name: name,
+            description: description
+        };
+        $.ajax({
+            type: 'POST',
+            url: '/api/catalog/add/{{category}}',
+            processData: false,
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function (result) {
+                // Handle or verify the server response if necessary.
+                if (result) {
+                    setTimeout(function () {
+                        window.location.href = "{{url_for('category_list_view', category=category)}}";
+                    }, 1000);
+                } else {
+                    console.error('Failed to make a server-side call. Check your configuration and console.');
+                }
+            }
+
+        });
+    }
+</script>
+{% endblock %}

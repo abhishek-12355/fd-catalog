@@ -1,76 +1,54 @@
 from datetime import datetime
-from sqlalchemy import Column, DateTime, String, ForeignKey
+from sqlalchemy import Column, DateTime, String, ForeignKey, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
 
 Base = declarative_base()
 
 
+class UserTable(Base):
+    __tablename__= 'user_table'
+    user_id = Column(String(250), primary_key=True)
+
+    @property
+    def serialize(self):
+        return {
+            'user_id': self.user_id
+        }
+
+
 class CategoriesTable(Base):
     __tablename__ = 'categories_table'
-    name = Column(String(80), nullable=False, primary_key=True)
+    category_name = Column(String(80), primary_key=True)
+    user_id = Column(String(250), ForeignKey('user_table.user_id'))
+    user = relationship(UserTable)
+    items = relationship("CategoryItemsTable")
+
+    @property
+    def serialize(self):
+        return {
+            'user_id': self.user_id,
+            'category_name': self.category_name
+        }
 
 
 class CategoryItemsTable(Base):
     __tablename__ = 'category_items_table'
-    category = Column(String(80), ForeignKey('categories_table.name'),
-                      nullable=False,
+    category = Column(String(80), ForeignKey('categories_table.category_name'),
                       primary_key=True)
-    name = Column(String(80), nullable=False,   primary_key=True)
+    item_name = Column(String(80), primary_key=True)
     entry_date = Column(DateTime, default=datetime.now())
     description = Column(String(4000))
+    category_table = relationship(CategoriesTable)
+
+    @property
+    def serialize(self):
+        return {
+            'item_name': self.item_name,
+            'category': self.category
+        }
 
 
 if __name__ == '__main__':
     engine = create_engine('sqlite:///catalog.db')
     Base.metadata.create_all(engine)
-
-    DBSession = sessionmaker(bind=engine)
-    session = DBSession()
-
-    initialCategoryList = [
-        CategoriesTable(name='Soccer'),
-        CategoriesTable(name='Basketball'),
-        CategoriesTable(name='Baseball'),
-        CategoriesTable(name='Frisbee'),
-        CategoriesTable(name='Snowboarding'),
-        CategoriesTable(name='Rock Climbing'),
-        CategoriesTable(name='Foosball'),
-        CategoriesTable(name='Skating'),
-        CategoriesTable(name='Hockey')
-    ]
-
-    initialCategoryItems = [
-        CategoryItemsTable(name='Stick',
-                           category='Hockey',
-                           description='Stick description'),
-        CategoryItemsTable(name='Goggles',
-                           category='Snowboarding',
-                           description='Goggles description'),
-        CategoryItemsTable(name='Snowboard',
-                           category='Snowboarding',
-                           description='Snowboard description'),
-        CategoryItemsTable(name='Two shinguards',
-                           category='Soccer',
-                           description='Two shinguards description'),
-        CategoryItemsTable(name='Shinguards',
-                           category='Soccer',
-                           description='Shinguards description'),
-        CategoryItemsTable(name='Frisbee',
-                           category='Frisbee',
-                           description='Frisbee description'),
-        CategoryItemsTable(name='Bat',
-                           category='Baseball',
-                           description='Bat description'),
-        CategoryItemsTable(name='Jersey',
-                           category='Soccer',
-                           description='Jersey description'),
-        CategoryItemsTable(name='Soccer Cleats',
-                           category='Soccer',
-                           description='Soccer Cleats description'),
-    ]
-
-    session.add_all(initialCategoryList)
-    session.add_all(initialCategoryItems)
-    session.commit()
